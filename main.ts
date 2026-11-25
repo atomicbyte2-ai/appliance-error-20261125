@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 // The funniest honest error message an appliance could show:
@@ -28,5 +28,12 @@ validate(LINE);
 
 const outputDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
 mkdirSync(outputDir, { recursive: true });
-writeFileSync(join(outputDir, "entry.txt"), LINE, "utf8");
+const outPath = join(outputDir, "entry.txt");
+writeFileSync(outPath, LINE, "utf8");
+// Read back and confirm the file is exactly the line: no trailing
+// newline, no extra bytes, no encoding surprise.
+const written = readFileSync(outPath, "utf8");
+if (written !== LINE) {
+  throw new Error("entry.txt does not match the validated line");
+}
 console.log(`Wrote entry.txt (${LINE.length} characters)`);
